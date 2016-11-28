@@ -831,6 +831,10 @@
     CodeGenerator.prototype.maybeBlock = function(stmt, flags) {
         var result, noLeadingComment, that = this;
 
+        if (stmt === null) {
+            return '';
+        }
+
         noLeadingComment = !extra.comment || !stmt.leadingComments;
 
         if (stmt.type === Syntax.BlockStatement && noLeadingComment) {
@@ -1076,8 +1080,9 @@
                     if (i === iz - 1) {
                         bodyFlags |= F_SEMICOLON_OPT;
                     }
-
-                    if (stmt.body[i].leadingComments && preserveBlankLines) {
+                    if (stmt.body[i] === null) {
+                        fragment = '';
+                    } else if (stmt.body[i].leadingComments && preserveBlankLines) {
                         fragment = that.generateStatement(stmt.body[i], bodyFlags);
                     } else {
                         fragment = addIndent(that.generateStatement(stmt.body[i], bodyFlags));
@@ -1721,7 +1726,7 @@
                         if (!stmt.body[i + 1].leadingComments) {
                             result.push(newline);
                         }
-                    } else {
+                    } else if (stmt.body[i] !== null) {
                         result.push(newline);
                     }
                 }
@@ -2190,13 +2195,14 @@
                 result = [ '{', newline, indent, fragment ];
 
                 if (multiline) {
-                    result.push(',' + newline);
                     for (i = 1, iz = expr.properties.length; i < iz; ++i) {
+                        if (expr.properties[i] === null) {
+                            continue;
+                        }
+
+                        result.push(',' + newline);
                         result.push(indent);
                         result.push(that.generateExpression(expr.properties[i], Precedence.Sequence, E_TTT));
-                        if (i + 1 < iz) {
-                            result.push(',' + newline);
-                        }
                     }
                 }
             });
@@ -2450,6 +2456,10 @@
     CodeGenerator.prototype.generateExpression = function (expr, precedence, flags) {
         var result, type;
 
+        if (expr === null) {
+            return '';
+        }
+
         type = expr.type || Syntax.Property;
 
         if (extra.verbatim && expr.hasOwnProperty(extra.verbatim)) {
@@ -2468,6 +2478,10 @@
     CodeGenerator.prototype.generateStatement = function (stmt, flags) {
         var result,
             fragment;
+
+        if (stmt === null) {
+            return '';
+        }
 
         result = this[stmt.type](stmt, flags);
 
