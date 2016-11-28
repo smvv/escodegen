@@ -987,8 +987,9 @@
     CodeGenerator.prototype.generatePropertyKey = function (expr, computed, value) {
         var result = [];
 
-        if (value === null)
+        if (value === null) {
             return [];
+        }
 
         if (computed) {
             result.push('[');
